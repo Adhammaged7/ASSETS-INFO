@@ -9,7 +9,6 @@
     * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
     body { background-color: #f4f6f9; margin: 0; padding: 20px; }
 
-    /* شاشة تسجيل الدخول */
     #loginOverlay {
       position: fixed; top: 0; left: 0; width: 100%; height: 100%;
       background: #1e3a8a; display: flex; justify-content: center; align-items: center; z-index: 9999;
@@ -28,7 +27,6 @@
       border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 15px;
     }
 
-    /* المحتوى الرئيسي */
     #mainContent { display: none; }
     .company-header {
       text-align: center; margin-bottom: 25px; background: #ffffff; padding: 15px 20px;
@@ -67,7 +65,6 @@
     .btn-action { border: none; padding: 6px 14px; border-radius: 20px; color: white; font-size: 13px; font-weight: 600; cursor: pointer; }
     .btn-delete { background-color: #e74c3c; }
 
-    /* Modal نافذة الإضافة */
     .modal-overlay {
       display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
       background: rgba(0, 0, 0, 0.5); z-index: 1000; justify-content: center; align-items: center;
@@ -87,7 +84,6 @@
 </head>
 <body>
 
-  <!-- تسجيل الدخول -->
   <div id="loginOverlay">
     <div class="login-card">
       <h2>ASSETS System</h2>
@@ -97,7 +93,6 @@
     </div>
   </div>
 
-  <!-- التطبيق الرئيسي -->
   <div id="mainContent">
     <div class="company-header">
       <h1 class="company-title">ASSETS</h1>
@@ -143,7 +138,6 @@
     </div>
   </div>
 
-  <!-- النافذة المنبثقة -->
   <div class="modal-overlay" id="addModal">
     <div class="modal-card">
       <div class="modal-header">
@@ -168,35 +162,24 @@
     </div>
   </div>
 
-  <!-- مكتبات Firebase -->
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
   <script>
-    // إعدادات Firebase 
+    // ⚠️ استبدل هذه الإعدادات ببيانات مشروعك الحقيقية من موقع Firebase Console
     const firebaseConfig = {
-      apiKey: "AIzaSyD-xxxxxx_ExampleKeyXXXXXX",
-      authDomain: "assets-realestate.firebaseapp.com",
-      databaseURL: "https://assets-realestate-default-rtdb.firebaseio.com",
-      projectId: "assets-realestate",
-      storageBucket: "assets-realestate.appspot.com",
-      messagingSenderId: "123456789012",
-      appId: "1:123456789012:web:abcdef123456"
+     apiKey: "AIzaSyB1yukSqqn33WtlnimpWxeMwaE8vlitZ7M",
+    authDomain: "assets-info.firebaseapp.com",
+    databaseURL: "https://assets-info-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "assets-info",
+    storageBucket: "assets-info.firebasestorage.app",
+    messagingSenderId: "643987246702",
+    appId: "1:643987246702:web:52c3419e26e47dda9f207f",
+    measurementId: "G-VGE129D43D"
     };
 
-    let useFirebase = false;
-    let db = null;
-
-    // محاولة الاتصال بـ Firebase إذا تم إدخال بيانات سليمة
-    if (!firebaseConfig.apiKey.includes("xxxxxx")) {
-      try {
-        firebase.initializeApp(firebaseConfig);
-        db = firebase.database();
-        useFirebase = true;
-      } catch(e) {
-        console.warn("جاري استخدام التخزين المحلي لعدم اكتمال بيانات Firebase.");
-      }
-    }
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
 
     function checkPassword() {
       const pass = document.getElementById("passInput").value;
@@ -215,47 +198,41 @@
     function showApp() {
       document.getElementById("loginOverlay").style.display = "none";
       document.getElementById("mainContent").style.display = "block";
-      loadData();
+      listenToLiveUpdates();
     }
 
-    // جلب البيانات (سحابياً أو محلياً)
-    function loadData() {
-      if (useFirebase && db) {
-        db.ref("properties").on("value", (snapshot) => {
-          renderTable(snapshot.val() || {});
-        });
-      } else {
-        const localData = JSON.parse(localStorage.getItem("assets_properties") || "{}");
-        renderTable(localData);
-      }
-    }
+    // ⚡ الدالة المسؤولة عن المزامنة اللحظية بين كل الأجهزة
+    function listenToLiveUpdates() {
+      db.ref("properties").on("value", (snapshot) => {
+        const tbody = document.getElementById("tableBody");
+        tbody.innerHTML = "";
+        const data = snapshot.val();
 
-    // عرض البيانات داخل الجدول
-    function renderTable(data) {
-      const tbody = document.getElementById("tableBody");
-      tbody.innerHTML = "";
-
-      Object.keys(data).forEach((key) => {
-        const item = data[key];
-        const row = tbody.insertRow();
-        row.innerHTML = `
-          <td>${item.location || ''}</td>
-          <td data-value="${item.price || 0}">${item.price ? parseFloat(item.price).toLocaleString() : 0}</td>
-          <td data-value="${item.area || 0}">${item.area || 0} م²</td>
-          <td>${item.rooms || ''}</td>
-          <td>${item.floor || ''}</td>
-          <td>${item.delivery || ''}</td>
-          <td data-value="${item.installment || 0}">${item.installment || 0} سنوات</td>
-          <td>${item.gardenRoof || ''}</td>
-          <td>${item.finishing || ''}</td>
-          <td>${item.phone || ''}</td>
-          <td><button class="btn-action btn-delete" onclick="deleteProperty('${key}')">حذف <i class="fas fa-trash-alt"></i></button></td>
-        `;
+        if (data) {
+          Object.keys(data).forEach((key) => {
+            const item = data[key];
+            const row = tbody.insertRow();
+            row.innerHTML = `
+              <td>${item.location || ''}</td>
+              <td data-value="${item.price || 0}">${item.price ? parseFloat(item.price).toLocaleString() : 0}</td>
+              <td data-value="${item.area || 0}">${item.area || 0} م²</td>
+              <td>${item.rooms || ''}</td>
+              <td>${item.floor || ''}</td>
+              <td>${item.delivery || ''}</td>
+              <td data-value="${item.installment || 0}">${item.installment || 0} سنوات</td>
+              <td>${item.gardenRoof || ''}</td>
+              <td>${item.finishing || ''}</td>
+              <td>${item.phone || ''}</td>
+              <td><button class="btn-action btn-delete" onclick="deleteProperty('${key}')">حذف <i class="fas fa-trash-alt"></i></button></td>
+            `;
+          });
+        }
+        filterTable();
+      }, (error) => {
+        alert("خطأ الاتصال بالسحابة: " + error.message);
       });
-      filterTable();
     }
 
-    // إضافة عقار جديد
     function addProperty(event) {
       event.preventDefault();
 
@@ -272,43 +249,25 @@
         phone: document.getElementById("addPhone").value
       };
 
-      if (useFirebase && db) {
-        db.ref("properties").push(newProperty)
-          .then(() => {
-            alert("تم الحفظ بنجاح!");
-            closeModal();
-          })
-          .catch((error) => alert("خطأ في السيرفر: " + error.message));
-      } else {
-        // الحفظ في التخزين المحلي المحلي عند عدم تفعيل Firebase
-        const localData = JSON.parse(localStorage.getItem("assets_properties") || "{}");
-        const newKey = "item_" + Date.now();
-        localData[newKey] = newProperty;
-        localStorage.setItem("assets_properties", JSON.stringify(localData));
-        alert("تم حفظ العقار بنجاح!");
-        closeModal();
-        loadData();
-      }
+      // إرسال العقار للسحابة لتصل لكل الأجهزة في نفس اللحظة
+      db.ref("properties").push(newProperty)
+        .then(() => {
+          closeModal();
+        })
+        .catch((error) => {
+          alert("حدث خطأ أثناء الحفظ: " + error.message);
+        });
     }
 
-    // حذف عقار
     function deleteProperty(id) {
       if (confirm("هل أنت متأكد من حذف هذا العقار؟")) {
-        if (useFirebase && db) {
-          db.ref("properties/" + id).remove();
-        } else {
-          const localData = JSON.parse(localStorage.getItem("assets_properties") || "{}");
-          delete localData[id];
-          localStorage.setItem("assets_properties", JSON.stringify(localData));
-          loadData();
-        }
+        db.ref("properties/" + id).remove();
       }
     }
 
     function openModal() { document.getElementById("addModal").style.display = "flex"; }
     function closeModal() { document.getElementById("addModal").style.display = "none"; document.getElementById("addPropertyForm").reset(); }
 
-    // الفلترة والبحث
     function filterTable() {
       const globalFilter = document.getElementById("globalInput").value.toLowerCase();
       const priceMax = parseFloat(document.getElementById("searchPriceMax").value);
