@@ -67,6 +67,7 @@
     .btn-action { border: none; padding: 6px 14px; border-radius: 20px; color: white; font-size: 13px; font-weight: 600; cursor: pointer; }
     .btn-delete { background-color: #e74c3c; }
 
+    /* Modal نافذة الإضافة */
     .modal-overlay {
       display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
       background: rgba(0, 0, 0, 0.5); z-index: 1000; justify-content: center; align-items: center;
@@ -86,7 +87,7 @@
 </head>
 <body>
 
-  <!-- نافذة تسجيل الدخول -->
+  <!-- تسجيل الدخول -->
   <div id="loginOverlay">
     <div class="login-card">
       <h2>ASSETS System</h2>
@@ -96,7 +97,7 @@
     </div>
   </div>
 
-  <!-- المحتوى الرئيسي للموقع -->
+  <!-- التطبيق الرئيسي -->
   <div id="mainContent">
     <div class="company-header">
       <h1 class="company-title">ASSETS</h1>
@@ -137,13 +138,12 @@
           </tr>
         </thead>
         <tbody id="tableBody">
-          <!-- البيانات تُجلب تلقائياً من السحابة -->
         </tbody>
       </table>
     </div>
   </div>
 
-  <!-- Modal إضافة عقار -->
+  <!-- النافذة المنبثقة -->
   <div class="modal-overlay" id="addModal">
     <div class="modal-card">
       <div class="modal-header">
@@ -162,7 +162,7 @@
           <div class="form-group"><label>جاردن او روف</label><input type="text" id="addGardenRoof" required></div>
           <div class="form-group"><label>التشطيب</label><input type="text" id="addFinishing" required></div>
           <div class="form-group"><label>الرقم</label><input type="text" id="addPhone" required></div>
-          <button type="submit" class="form-submit-btn">حفظ العقار</button>
+          <button type="submit" id="submitBtn" class="form-submit-btn">حفظ العقار</button>
         </div>
       </form>
     </div>
@@ -173,7 +173,7 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
   <script>
-    // تم إضافة إعدادات مشروعك هنا مباشرة
+    // إعدادات Firebase 
     const firebaseConfig = {
       apiKey: "AIzaSyD-xxxxxx_ExampleKeyXXXXXX",
       authDomain: "assets-realestate.firebaseapp.com",
@@ -184,11 +184,20 @@
       appId: "1:123456789012:web:abcdef123456"
     };
 
-    // تشغيل الاتصال
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
+    let useFirebase = false;
+    let db = null;
 
-    // التحقق من كلمة المرور
+    // محاولة الاتصال بـ Firebase إذا تم إدخال بيانات سليمة
+    if (!firebaseConfig.apiKey.includes("xxxxxx")) {
+      try {
+        firebase.initializeApp(firebaseConfig);
+        db = firebase.database();
+        useFirebase = true;
+      } catch(e) {
+        console.warn("جاري استخدام التخزين المحلي لعدم اكتمال بيانات Firebase.");
+      }
+    }
+
     function checkPassword() {
       const pass = document.getElementById("passInput").value;
       if (pass === "123123") {
@@ -206,70 +215,100 @@
     function showApp() {
       document.getElementById("loginOverlay").style.display = "none";
       document.getElementById("mainContent").style.display = "block";
-      listenToData();
+      loadData();
     }
 
-    // قراءة البيانات لحظياً من السحابة
-    function listenToData() {
-      db.ref("properties").on("value", (snapshot) => {
-        const tbody = document.getElementById("tableBody");
-        tbody.innerHTML = "";
-        const data = snapshot.val();
+    // جلب البيانات (سحابياً أو محلياً)
+    function loadData() {
+      if (useFirebase && db) {
+        db.ref("properties").on("value", (snapshot) => {
+          renderTable(snapshot.val() || {});
+        });
+      } else {
+        const localData = JSON.parse(localStorage.getItem("assets_properties") || "{}");
+        renderTable(localData);
+      }
+    }
 
-        if (data) {
-          Object.keys(data).forEach((key) => {
-            const item = data[key];
-            const row = tbody.insertRow();
-            row.innerHTML = `
-              <td>${item.location}</td>
-              <td data-value="${item.price}">${parseFloat(item.price).toLocaleString()}</td>
-              <td data-value="${item.area}">${item.area} م²</td>
-              <td>${item.rooms}</td>
-              <td>${item.floor}</td>
-              <td>${item.delivery}</td>
-              <td data-value="${item.installment}">${item.installment} سنوات</td>
-              <td>${item.gardenRoof}</td>
-              <td>${item.finishing}</td>
-              <td>${item.phone}</td>
-              <td><button class="btn-action btn-delete" onclick="deleteProperty('${key}')">حذف <i class="fas fa-trash-alt"></i></button></td>
-            `;
-          });
-        }
-        filterTable();
+    // عرض البيانات داخل الجدول
+    function renderTable(data) {
+      const tbody = document.getElementById("tableBody");
+      tbody.innerHTML = "";
+
+      Object.keys(data).forEach((key) => {
+        const item = data[key];
+        const row = tbody.insertRow();
+        row.innerHTML = `
+          <td>${item.location || ''}</td>
+          <td data-value="${item.price || 0}">${item.price ? parseFloat(item.price).toLocaleString() : 0}</td>
+          <td data-value="${item.area || 0}">${item.area || 0} م²</td>
+          <td>${item.rooms || ''}</td>
+          <td>${item.floor || ''}</td>
+          <td>${item.delivery || ''}</td>
+          <td data-value="${item.installment || 0}">${item.installment || 0} سنوات</td>
+          <td>${item.gardenRoof || ''}</td>
+          <td>${item.finishing || ''}</td>
+          <td>${item.phone || ''}</td>
+          <td><button class="btn-action btn-delete" onclick="deleteProperty('${key}')">حذف <i class="fas fa-trash-alt"></i></button></td>
+        `;
       });
+      filterTable();
     }
 
-    // إضافة عقار جديد للسحابة
+    // إضافة عقار جديد
     function addProperty(event) {
       event.preventDefault();
-      
+
       const newProperty = {
         location: document.getElementById("addLocation").value,
-        price: parseFloat(document.getElementById("addPrice").value),
-        area: parseFloat(document.getElementById("addArea").value),
+        price: parseFloat(document.getElementById("addPrice").value) || 0,
+        area: parseFloat(document.getElementById("addArea").value) || 0,
         rooms: document.getElementById("addRooms").value,
         floor: document.getElementById("addFloor").value,
         delivery: document.getElementById("addDelivery").value,
-        installment: parseFloat(document.getElementById("addInstallment").value),
+        installment: parseFloat(document.getElementById("addInstallment").value) || 0,
         gardenRoof: document.getElementById("addGardenRoof").value,
         finishing: document.getElementById("addFinishing").value,
         phone: document.getElementById("addPhone").value
       };
 
-      db.ref("properties").push(newProperty);
-      closeModal();
+      if (useFirebase && db) {
+        db.ref("properties").push(newProperty)
+          .then(() => {
+            alert("تم الحفظ بنجاح!");
+            closeModal();
+          })
+          .catch((error) => alert("خطأ في السيرفر: " + error.message));
+      } else {
+        // الحفظ في التخزين المحلي المحلي عند عدم تفعيل Firebase
+        const localData = JSON.parse(localStorage.getItem("assets_properties") || "{}");
+        const newKey = "item_" + Date.now();
+        localData[newKey] = newProperty;
+        localStorage.setItem("assets_properties", JSON.stringify(localData));
+        alert("تم حفظ العقار بنجاح!");
+        closeModal();
+        loadData();
+      }
     }
 
-    // حذف عقار من السحابة
+    // حذف عقار
     function deleteProperty(id) {
       if (confirm("هل أنت متأكد من حذف هذا العقار؟")) {
-        db.ref("properties/" + id).remove();
+        if (useFirebase && db) {
+          db.ref("properties/" + id).remove();
+        } else {
+          const localData = JSON.parse(localStorage.getItem("assets_properties") || "{}");
+          delete localData[id];
+          localStorage.setItem("assets_properties", JSON.stringify(localData));
+          loadData();
+        }
       }
     }
 
     function openModal() { document.getElementById("addModal").style.display = "flex"; }
     function closeModal() { document.getElementById("addModal").style.display = "none"; document.getElementById("addPropertyForm").reset(); }
 
+    // الفلترة والبحث
     function filterTable() {
       const globalFilter = document.getElementById("globalInput").value.toLowerCase();
       const priceMax = parseFloat(document.getElementById("searchPriceMax").value);
