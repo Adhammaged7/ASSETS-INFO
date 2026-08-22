@@ -3,93 +3,187 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ASSETS - نظام إدارة العقارات</title>
+  <title id="pageTitle">ASSETS - Real Estate Elite System</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap" rel="stylesheet">
   <style>
-    * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-    body { background-color: #f4f6f9; margin: 0; padding: 20px; }
+    :root {
+      --bg-dark: #0b0f19;
+      --panel-bg: rgba(18, 24, 38, 0.85);
+      --accent-gold: #d4af37;
+      --accent-gold-hover: #f3e5ab;
+      --gold-gradient: linear-gradient(135deg, #bf953f 0%, #fcf6ba 25%, #b38728 50%, #fbf5b7 75%, #aa771c 100%);
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --border-color: rgba(212, 175, 55, 0.25);
+      --glass-border: rgba(255, 255, 255, 0.08);
+      --shadow-luxury: 0 10px 35px -5px rgba(0, 0, 0, 0.6), 0 0 15px rgba(212, 175, 55, 0.1);
+    }
 
+    * { box-sizing: border-box; font-family: 'Tajawal', 'Segoe UI', Tahoma, sans-serif; }
+    body { background: var(--bg-dark); color: var(--text-main); margin: 0; padding: 0; min-height: 100vh; position: relative; background-image: radial-gradient(circle at 50% 0%, rgba(212, 175, 55, 0.08) 0%, transparent 60%); }
+
+    /* زر تغيير اللغة - أعلى اليمين */
+    .lang-btn-top {
+      position: fixed; top: 20px; right: 25px; background: var(--panel-bg);
+      color: var(--accent-gold); border: 1px solid var(--border-color);
+      padding: 9px 20px; border-radius: 30px; cursor: pointer; font-weight: 700; font-size: 13px;
+      display: flex; align-items: center; gap: 8px; transition: all 0.3s ease; z-index: 1000;
+      box-shadow: var(--shadow-luxury); backdrop-filter: blur(10px);
+    }
+    html[dir="ltr"] .lang-btn-top { right: auto; left: 25px; }
+    .lang-btn-top:hover { background: var(--gold-gradient); color: #0b0f19; transform: translateY(-2px); box-shadow: 0 0 20px rgba(212, 175, 55, 0.4); }
+
+    /* شاشه تسجيل الدخول */
     #loginOverlay {
       position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: #1e3a8a; display: flex; justify-content: center; align-items: center; z-index: 9999;
+      background: radial-gradient(circle, #151d2a 0%, #080b12 100%);
+      display: flex; justify-content: center; align-items: center; z-index: 9999;
     }
     .login-card {
-      background: white; padding: 30px; border-radius: 12px; text-align: center;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.2); width: 90%; max-width: 350px;
+      background: var(--panel-bg); padding: 45px 35px; border-radius: 20px; text-align: center;
+      box-shadow: var(--shadow-luxury); width: 90%; max-width: 400px; border: 1px solid var(--border-color);
+      backdrop-filter: blur(12px);
     }
-    .login-card h2 { margin-top: 0; color: #1e3a8a; }
+    .login-card h2 { margin: 0 0 10px 0; background: var(--gold-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: 32px; font-weight: 900; letter-spacing: 2px; }
+    .login-card p { color: var(--text-muted); font-size: 14px; margin-bottom: 25px; }
     .login-card input {
-      width: 100%; padding: 10px; margin: 15px 0; border: 1px solid #ccc;
-      border-radius: 6px; text-align: center; font-size: 16px;
+      width: 100%; padding: 14px 15px; margin-bottom: 20px; border: 1px solid var(--border-color);
+      border-radius: 10px; text-align: center; font-size: 16px; outline: none; transition: 0.3s;
+      background: rgba(255, 255, 255, 0.05); color: #fff;
     }
+    .login-card input:focus { border-color: var(--accent-gold); box-shadow: 0 0 12px rgba(212, 175, 55, 0.3); }
     .login-card button {
-      width: 100%; padding: 10px; background: #2563eb; color: white; border: none;
-      border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 15px;
+      width: 100%; padding: 14px; background: var(--gold-gradient); color: #000; border: none;
+      border-radius: 10px; font-weight: 900; cursor: pointer; font-size: 16px; transition: 0.3s;
     }
+    .login-card button:hover { transform: translateY(-2px); box-shadow: 0 0 20px rgba(212, 175, 55, 0.5); }
 
-    #mainContent { display: none; }
+    /* الهيكل الرئيسي */
+    #mainContent { display: none; padding: 30px 40px; max-width: 1650px; margin: 0 auto; }
+
+    /* الهيدر العلوي */
     .company-header {
-      text-align: center; margin-bottom: 25px; background: #ffffff; padding: 15px 20px;
-      border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border: 1px solid #e1e5eb;
+      background: var(--panel-bg); padding: 22px 35px; border-radius: 20px;
+      box-shadow: var(--shadow-luxury); border: 1px solid var(--border-color);
+      display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; flex-wrap: wrap; gap: 15px;
+      backdrop-filter: blur(10px);
     }
-    .company-title { font-size: 32px; font-weight: 900; color: #1e3a8a; letter-spacing: 3px; margin: 0 0 8px 0; }
-    .credits { display: flex; justify-content: center; gap: 30px; font-size: 14px; font-weight: 600; color: #4b5563; }
-    .credits span { background: #f3f4f6; padding: 4px 12px; border-radius: 20px; border: 1px solid #e5e7eb; }
+    .company-title { font-size: 36px; font-weight: 900; background: var(--gold-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: 3px; margin: 0; }
+    .credits { display: flex; gap: 15px; font-size: 13px; font-weight: 700; color: var(--accent-gold); }
+    .credits span { background: rgba(212, 175, 55, 0.08); padding: 8px 18px; border-radius: 30px; border: 1px solid var(--border-color); }
 
-    .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; gap: 15px; }
+    /* بطاقات الإحصائيات (Luxury Cards) */
+    .stats-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; margin-bottom: 30px; }
+    .stat-card {
+      background: var(--panel-bg); padding: 22px; border-radius: 16px; border: 1px solid var(--glass-border);
+      box-shadow: var(--shadow-luxury); display: flex; align-items: center; gap: 18px; transition: 0.3s;
+      position: relative; overflow: hidden;
+    }
+    .stat-card::after { content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: var(--gold-gradient); }
+    .stat-card:hover { transform: translateY(-3px); border-color: var(--border-color); }
+    .stat-icon { width: 55px; height: 55px; border-radius: 14px; background: rgba(212, 175, 55, 0.1); color: var(--accent-gold); display: flex; align-items: center; justify-content: center; font-size: 22px; border: 1px solid var(--border-color); }
+    .stat-info h4 { margin: 0; font-size: 13px; color: var(--text-muted); }
+    .stat-info p { margin: 5px 0 0 0; font-size: 22px; font-weight: 900; color: #fff; }
+
+    /* شريط أدوات الجدول */
+    .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 22px; gap: 15px; flex-wrap: wrap; }
     .top-right { display: flex; align-items: center; gap: 15px; }
-    .main-title { font-size: 22px; font-weight: bold; color: #111; margin: 0; }
+    .main-title { font-size: 22px; font-weight: 700; color: #fff; margin: 0; }
     
     .btn-add-property {
-      background-color: #2563eb; color: white; border: none; padding: 10px 18px;
-      border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer;
-      display: inline-flex; align-items: center; gap: 8px;
+      background: var(--gold-gradient); color: #000; border: none; padding: 12px 24px;
+      border-radius: 12px; font-size: 14px; font-weight: 900; cursor: pointer;
+      display: inline-flex; align-items: center; gap: 8px; transition: 0.3s; box-shadow: 0 4px 15px rgba(212, 175, 55, 0.2);
     }
-    
-    .global-search-container { position: relative; width: 320px; }
+    .btn-add-property:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(212, 175, 55, 0.4); }
+
+    .global-search-container { position: relative; width: 340px; }
     .global-search-container input {
-      width: 100%; padding: 10px 15px 10px 35px; border: 1px solid #ccc;
-      border-radius: 8px; font-size: 14px; outline: none;
+      width: 100%; padding: 12px 15px 12px 42px; border: 1px solid var(--border-color);
+      border-radius: 12px; font-size: 14px; outline: none; background: var(--panel-bg); color: #fff; transition: 0.3s;
     }
-    .global-search-container i { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #888; }
+    html[dir="ltr"] .global-search-container input { padding: 12px 42px 12px 15px; }
+    .global-search-container input:focus { border-color: var(--accent-gold); box-shadow: 0 0 15px rgba(212, 175, 55, 0.2); }
+    .global-search-container i { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: var(--accent-gold); }
+    html[dir="ltr"] .global-search-container i { left: auto; right: 15px; }
 
-    .table-card { background: #ffffff; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); border: 1px solid #e1e5eb; overflow-x: auto; }
+    /* كارت الجدول */
+    .table-card {
+      background: var(--panel-bg); border-radius: 20px; box-shadow: var(--shadow-luxury);
+      border: 1px solid var(--border-color); overflow-x: auto; backdrop-filter: blur(10px);
+    }
     table { width: 100%; border-collapse: collapse; min-width: 1350px; text-align: center; }
-    th, td { padding: 12px 8px; border: 1px solid #e9ecef; vertical-align: middle; font-size: 14px; }
-    th { background-color: #f8f9fa; color: #333; font-weight: 700; }
+    th {
+      background: rgba(255, 255, 255, 0.02); color: var(--accent-gold); font-weight: 700; padding: 18px 10px;
+      border-bottom: 2px solid var(--border-color); font-size: 14px;
+    }
+    td { padding: 16px 10px; border-bottom: 1px solid var(--glass-border); font-size: 14px; color: var(--text-main); }
     
-    .column-search { width: 100%; padding: 6px 4px; margin-top: 8px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 11px; text-align: center; }
-    tr:nth-child(even) { background-color: #fcfcfc; }
-    tr:hover { background-color: #f1f5f9; }
+    .column-search {
+      width: 100%; padding: 7px 8px; margin-top: 8px; border: 1px solid var(--glass-border);
+      border-radius: 8px; font-size: 11px; text-align: center; background: rgba(0, 0, 0, 0.4); color: #fff; outline: none;
+    }
+    .column-search:focus { border-color: var(--accent-gold); }
+    tr:hover { background-color: rgba(212, 175, 55, 0.04); }
 
-    .btn-action { border: none; padding: 6px 14px; border-radius: 20px; color: white; font-size: 13px; font-weight: 600; cursor: pointer; }
-    .btn-delete { background-color: #e74c3c; }
+    .btn-action { border: none; padding: 7px 16px; border-radius: 20px; color: white; font-size: 12px; font-weight: 700; cursor: pointer; transition: 0.3s; }
+    .btn-delete { background: linear-gradient(135deg, #ef4444 0%, #991b1b 100%); }
+    .btn-delete:hover { transform: translateY(-1px); box-shadow: 0 0 10px rgba(239, 68, 68, 0.4); }
 
+    .phone-cell { display: flex; align-items: center; justify-content: center; gap: 8px; }
+    .phone-lock-btn {
+      background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border-color); color: var(--accent-gold); padding: 5px 12px;
+      border-radius: 8px; cursor: pointer; font-size: 12px; transition: 0.3s;
+    }
+    .phone-lock-btn:hover { background: var(--gold-gradient); color: #000; }
+
+    /* النافذة المنبثقة Modal */
     .modal-overlay {
       display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0, 0, 0, 0.5); z-index: 1000; justify-content: center; align-items: center;
+      background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(8px); z-index: 2000;
+      justify-content: center; align-items: center;
     }
     .modal-card {
-      background: #fff; padding: 25px; border-radius: 12px; width: 90%; max-width: 650px;
-      max-height: 90vh; overflow-y: auto;
+      background: #0f172a; padding: 35px; border-radius: 20px; width: 90%; max-width: 650px;
+      max-height: 90vh; overflow-y: auto; box-shadow: var(--shadow-luxury); border: 1px solid var(--border-color);
+      animation: zoomIn 0.3s ease;
     }
-    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
-    .close-modal { cursor: pointer; font-size: 20px; color: #777; }
-    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-    .form-group { display: flex; flex-direction: column; gap: 5px; text-align: right; }
-    .form-group label { font-size: 13px; font-weight: 600; color: #444; }
-    .form-group input { padding: 8px 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 13px; }
-    .form-submit-btn { grid-column: span 2; background-color: #27ae60; color: white; border: none; padding: 10px; border-radius: 6px; font-size: 15px; font-weight: bold; cursor: pointer; }
+    @keyframes zoomIn { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 22px; border-bottom: 1px solid var(--border-color); padding-bottom: 14px; }
+    .modal-header h3 { margin: 0; color: var(--accent-gold); font-size: 22px; font-weight: 700; }
+    .close-modal { cursor: pointer; font-size: 22px; color: var(--text-muted); transition: 0.3s; }
+    .close-modal:hover { color: #ef4444; }
+    
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .form-group { display: flex; flex-direction: column; gap: 6px; text-align: right; }
+    html[dir="ltr"] .form-group { text-align: left; }
+    .form-group label { font-size: 13px; font-weight: 700; color: var(--accent-gold); }
+    .form-group input { padding: 11px; border: 1px solid var(--glass-border); border-radius: 10px; font-size: 13px; outline: none; background: rgba(255, 255, 255, 0.05); color: #fff; }
+    .form-group input:focus { border-color: var(--accent-gold); }
+    .form-submit-btn { grid-column: span 2; background: var(--gold-gradient); color: #000; border: none; padding: 13px; border-radius: 10px; font-size: 16px; font-weight: 900; cursor: pointer; transition: 0.3s; margin-top: 10px; }
+    .form-submit-btn:hover { box-shadow: 0 0 20px rgba(212, 175, 55, 0.4); }
+
+    @media (max-width: 768px) {
+      #mainContent { padding: 15px; }
+      .company-header { flex-direction: column; text-align: center; }
+      .global-search-container { width: 100%; }
+    }
   </style>
 </head>
 <body>
 
+  <!-- زر تغيير اللغة في أعلى اليمين -->
+  <button class="lang-btn-top" onclick="toggleLanguage()">
+    <i class="fas fa-globe"></i> <span id="langBtnText">English</span>
+  </button>
+
   <div id="loginOverlay">
     <div class="login-card">
-      <h2>ASSETS System</h2>
-      <p>يرجى إدخال كلمة المرور للوصول</p>
-      <input type="password" id="passInput" placeholder="كلمة المرور">
-      <button onclick="checkPassword()">دخول</button>
+      <h2>ASSETS</h2>
+      <p id="loginText">يرجى إدخال كلمة المرور للوصول</p>
+      <input type="password" id="passInput" placeholder="كلمة المرور" onkeypress="if(event.key==='Enter') checkPassword()">
+      <button onclick="checkPassword()" id="loginBtn">دخول</button>
     </div>
   </div>
 
@@ -97,8 +191,33 @@
     <div class="company-header">
       <h1 class="company-title">ASSETS</h1>
       <div class="credits">
-        <span>إدارة أ / محمد سعيد</span>
-        <span>برمجة م / أدهم ماجد</span>
+        <span id="creditManager"><i class="fas fa-user-tie"></i> إدارة أ / محمد سعيد</span>
+        <span id="creditDev"><i class="fas fa-code"></i> برمجة م / أدهم ماجد</span>
+      </div>
+    </div>
+
+    <!-- بطاقات إحصائيات سريعة -->
+    <div class="stats-container">
+      <div class="stat-card">
+        <div class="stat-icon"><i class="fas fa-building"></i></div>
+        <div class="stat-info">
+          <h4 id="statTotalTitle">إجمالي العقارات</h4>
+          <p id="statTotalCount">0</p>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon"><i class="fas fa-coins"></i></div>
+        <div class="stat-info">
+          <h4 id="statAvgPriceTitle">متوسط الأسعار</h4>
+          <p id="statAvgPrice">0 ج.م</p>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon"><i class="fas fa-vector-square"></i></div>
+        <div class="stat-info">
+          <h4 id="statAvgAreaTitle">متوسط المساحة</h4>
+          <p id="statAvgArea">0 م²</p>
+        </div>
       </div>
     </div>
 
@@ -109,9 +228,9 @@
       </div>
       <div class="top-right">
         <button class="btn-add-property" onclick="openModal()">
-          <i class="fas fa-plus-circle"></i> إضافة عقار جديد
+          <i class="fas fa-plus-circle"></i> <span id="btnAddText">إضافة عقار جديد</span>
         </button>
-        <h2 class="main-title">جدول العقارات</h2>
+        <h2 class="main-title" id="tableTitleText">جدول العقارات</h2>
       </div>
     </div>
 
@@ -119,17 +238,17 @@
       <table id="realEstateTable">
         <thead>
           <tr>
-            <th>مكان العقار <i class="fas fa-map-marker-alt"></i><br><input type="text" id="searchLocation" class="column-search" onkeyup="filterTable()" placeholder="بحث..."></th>
-            <th>السعر <i class="fas fa-dollar-sign"></i><br><input type="number" id="searchPriceMax" class="column-search" onkeyup="filterTable()" placeholder="حد أقصى (<=)"></th>
-            <th>المساحة <i class="fas fa-drafting-compass"></i><br><input type="number" id="searchAreaMax" class="column-search" onkeyup="filterTable()" placeholder="حد أقصى (<=)"></th>
-            <th>عدد الغرف <i class="fas fa-bed"></i><br><input type="text" id="searchRooms" class="column-search" onkeyup="filterTable()" placeholder="بحث..."></th>
-            <th>الدور <i class="fas fa-building"></i><br><input type="text" id="searchFloor" class="column-search" onkeyup="filterTable()" placeholder="بحث..."></th>
-            <th>مدة الاستلام <i class="fas fa-key"></i><br><input type="text" id="searchDelivery" class="column-search" onkeyup="filterTable()" placeholder="بحث..."></th>
-            <th>مدة التقسيط <i class="fas fa-business-time"></i><br><input type="number" id="searchInstallmentMin" class="column-search" onkeyup="filterTable()" placeholder="حد أدنى (>=)"></th>
-            <th>جاردن او روف <i class="fas fa-tree"></i><br><input type="text" id="searchGardenRoof" class="column-search" onkeyup="filterTable()" placeholder="بحث..."></th>
-            <th>التشطيب <i class="fas fa-paint-roller"></i><br><input type="text" id="searchFinishing" class="column-search" onkeyup="filterTable()" placeholder="بحث..."></th>
-            <th>الرقم <i class="fas fa-phone"></i><br><input type="text" id="searchPhone" class="column-search" onkeyup="filterTable()" placeholder="بحث..."></th>
-            <th>حذف</th>
+            <th><span id="thLoc">مكان العقار</span> <i class="fas fa-map-marker-alt"></i><br><input type="text" id="searchLocation" class="column-search" onkeyup="filterTable()" placeholder="بحث..."></th>
+            <th><span id="thPrice">السعر</span> <i class="fas fa-dollar-sign"></i><br><input type="number" id="searchPriceMax" class="column-search" onkeyup="filterTable()" placeholder="حد أقصى (<=)"></th>
+            <th><span id="thArea">المساحة</span> <i class="fas fa-drafting-compass"></i><br><input type="number" id="searchAreaMax" class="column-search" onkeyup="filterTable()" placeholder="حد أقصى (<=)"></th>
+            <th><span id="thRooms">عدد الغرف</span> <i class="fas fa-bed"></i><br><input type="text" id="searchRooms" class="column-search" onkeyup="filterTable()" placeholder="بحث..."></th>
+            <th><span id="thFloor">الدور</span> <i class="fas fa-building"></i><br><input type="text" id="searchFloor" class="column-search" onkeyup="filterTable()" placeholder="بحث..."></th>
+            <th><span id="thDelivery">مدة الاستلام</span> <i class="fas fa-key"></i><br><input type="text" id="searchDelivery" class="column-search" onkeyup="filterTable()" placeholder="بحث..."></th>
+            <th><span id="thInstallment">مدة التقسيط</span> <i class="fas fa-business-time"></i><br><input type="number" id="searchInstallmentMin" class="column-search" onkeyup="filterTable()" placeholder="حد أدنى (>=)"></th>
+            <th><span id="thGarden">جاردن أو روف</span> <i class="fas fa-tree"></i><br><input type="text" id="searchGardenRoof" class="column-search" onkeyup="filterTable()" placeholder="بحث..."></th>
+            <th><span id="thFinish">التشطيب</span> <i class="fas fa-paint-roller"></i><br><input type="text" id="searchFinishing" class="column-search" onkeyup="filterTable()" placeholder="بحث..."></th>
+            <th><span id="thPhone">الرقم</span> <i class="fas fa-phone"></i><br><input type="text" id="searchPhone" class="column-search" onkeyup="filterTable()" placeholder="بحث..."></th>
+            <th><span id="thDelete">حذف</span></th>
           </tr>
         </thead>
         <tbody id="tableBody">
@@ -138,24 +257,24 @@
     </div>
   </div>
 
-  <div class="modal-overlay" id="addModal">
+  <div class="modal-overlay" id="addModal" onclick="closeModalOnOverlay(event)">
     <div class="modal-card">
       <div class="modal-header">
-        <h3><i class="fas fa-plus-circle"></i> إضافة عقار جديد</h3>
+        <h3><i class="fas fa-plus-circle"></i> <span id="modalTitle">إضافة عقار جديد</span></h3>
         <i class="fas fa-times close-modal" onclick="closeModal()"></i>
       </div>
       <form id="addPropertyForm" onsubmit="addProperty(event)">
         <div class="form-grid">
-          <div class="form-group"><label>مكان العقار</label><input type="text" id="addLocation" required></div>
-          <div class="form-group"><label>السعر</label><input type="number" id="addPrice" required></div>
-          <div class="form-group"><label>المساحة</label><input type="number" id="addArea" required></div>
-          <div class="form-group"><label>عدد الغرف</label><input type="text" id="addRooms" required></div>
-          <div class="form-group"><label>الدور</label><input type="text" id="addFloor" required></div>
-          <div class="form-group"><label>مدة الاستلام</label><input type="text" id="addDelivery" required></div>
-          <div class="form-group"><label>مدة التقسيط (سنوات)</label><input type="number" id="addInstallment" required></div>
-          <div class="form-group"><label>جاردن او روف</label><input type="text" id="addGardenRoof" required></div>
-          <div class="form-group"><label>التشطيب</label><input type="text" id="addFinishing" required></div>
-          <div class="form-group"><label>الرقم</label><input type="text" id="addPhone" required></div>
+          <div class="form-group"><label id="lblLoc">مكان العقار</label><input type="text" id="addLocation" required></div>
+          <div class="form-group"><label id="lblPrice">السعر (ج.م)</label><input type="number" id="addPrice" required></div>
+          <div class="form-group"><label id="lblArea">المساحة (م²)</label><input type="number" id="addArea" required></div>
+          <div class="form-group"><label id="lblRooms">عدد الغرف</label><input type="text" id="addRooms" required></div>
+          <div class="form-group"><label id="lblFloor">الدور</label><input type="text" id="addFloor" required></div>
+          <div class="form-group"><label id="lblDelivery">مدة الاستلام</label><input type="text" id="addDelivery" required></div>
+          <div class="form-group"><label id="lblInstallment">مدة التقسيط (سنوات)</label><input type="number" id="addInstallment" required></div>
+          <div class="form-group"><label id="lblGarden">جاردن أو روف</label><input type="text" id="addGardenRoof" placeholder="مثال: جاردن 50m / لا يوجد" required></div>
+          <div class="form-group"><label id="lblFinish">التشطيب</label><input type="text" id="addFinishing" placeholder="مثال: سوبر لوكس / نصف تشطيب" required></div>
+          <div class="form-group"><label id="lblPhone">الرقم</label><input type="tel" id="addPhone" required></div>
           <button type="submit" id="submitBtn" class="form-submit-btn">حفظ العقار</button>
         </div>
       </form>
@@ -166,20 +285,115 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
   <script>
-  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-const firebaseConfig = {
-  apiKey: "AIzaSyB1yukSqqn33WtlnimpWxeMwaE8vlitZ7M",
-  authDomain: "assets-info.firebaseapp.com",
-  databaseURL: "https://assets-info-default-rtdb.europe-west1.firebasedatabase.app",
-  projectId: "assets-info",
-  storageBucket: "assets-info.firebasestorage.app",
-  messagingSenderId: "643987246702",
-  appId: "1:643987246702:web:52c3419e26e47dda9f207f",
-  measurementId: "G-VGE129D43D"
-};
+    const firebaseConfig = {
+      apiKey: "AIzaSyB1yukSqqn33WtlnimpWxeMwaE8vlitZ7M",
+      authDomain: "assets-info.firebaseapp.com",
+      databaseURL: "https://assets-info-default-rtdb.europe-west1.firebasedatabase.app",
+      projectId: "assets-info",
+      storageBucket: "assets-info.firebasestorage.app",
+      messagingSenderId: "643987246702",
+      appId: "1:643987246702:web:52c3419e26e47dda9f207f",
+      measurementId: "G-VGE129D43D"
+    };
 
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
+
+    let currentLang = "ar";
+    let isPhoneUnlocked = sessionStorage.getItem("phoneUnlocked") === "true";
+
+    const translations = {
+      ar: {
+        pageTitle: "ASSETS - نظام إدارة العقارات",
+        loginText: "يرجى إدخال كلمة المرور للوصول",
+        passPlaceholder: "كلمة المرور",
+        loginBtn: "دخول",
+        langBtnText: "English",
+        creditManager: "إدارة أ / محمد سعيد",
+        creditDev: "برمجة م / أدهم ماجد",
+        btnAddText: "إضافة عقار جديد",
+        tableTitleText: "جدول العقارات",
+        globalSearch: "بحث عام...",
+        searchPlace: "بحث...",
+        searchMax: "حد أقصى (<=)",
+        searchMin: "حد أدنى (>=)",
+        thLoc: "مكان العقار",
+        thPrice: "السعر",
+        thArea: "المساحة",
+        thRooms: "عدد الغرف",
+        thFloor: "الدور",
+        thDelivery: "مدة الاستلام",
+        thInstallment: "مدة التقسيط",
+        thGarden: "جاردن أو روف",
+        thFinish: "التشطيب",
+        thPhone: "الرقم",
+        thDelete: "حذف",
+        modalTitle: "إضافة عقار جديد",
+        lblLoc: "مكان العقار",
+        lblPrice: "السعر (ج.م)",
+        lblArea: "المساحة (م²)",
+        lblRooms: "عدد الغرف",
+        lblFloor: "الدور",
+        lblDelivery: "مدة الاستلام",
+        lblInstallment: "مدة التقسيط (سنوات)",
+        lblGarden: "جاردن أو روف",
+        lblFinish: "التشطيب",
+        lblPhone: "الرقم",
+        submitBtn: "حفظ العقار",
+        unitYears: "سنوات",
+        unitM2: "م²",
+        btnDeleteText: "حذف",
+        promptPhonePass: "يرجى إدخال كلمة مرور الهاتف للرؤية:",
+        statTotalTitle: "إجمالي العقارات",
+        statAvgPriceTitle: "متوسط الأسعار",
+        statAvgAreaTitle: "متوسط المساحة"
+      },
+      en: {
+        pageTitle: "ASSETS - Real Estate Management",
+        loginText: "Please enter password to access",
+        passPlaceholder: "Password",
+        loginBtn: "Login",
+        langBtnText: "العربية",
+        creditManager: "Managed by / Mr. Mohamed Saeed",
+        creditDev: "Developed by / Eng. Adham Majid",
+        btnAddText: "Add New Property",
+        tableTitleText: "Properties Table",
+        globalSearch: "Global Search...",
+        searchPlace: "Search...",
+        searchMax: "Max (<=)",
+        searchMin: "Min (>=)",
+        thLoc: "Location",
+        thPrice: "Price",
+        thArea: "Area",
+        thRooms: "Rooms",
+        thFloor: "Floor",
+        thDelivery: "Delivery",
+        thInstallment: "Installment",
+        thGarden: "Garden / Roof",
+        thFinish: "Finishing",
+        thPhone: "Phone",
+        thDelete: "Delete",
+        modalTitle: "Add New Property",
+        lblLoc: "Location",
+        lblPrice: "Price (EGP)",
+        lblArea: "Area (m²)",
+        lblRooms: "Rooms Count",
+        lblFloor: "Floor",
+        lblDelivery: "Delivery Period",
+        lblInstallment: "Installment Period (Years)",
+        lblGarden: "Garden or Roof",
+        lblFinish: "Finishing",
+        lblPhone: "Phone Number",
+        submitBtn: "Save Property",
+        unitYears: "Years",
+        unitM2: "m²",
+        btnDeleteText: "Delete",
+        promptPhonePass: "Please enter phone password to view:",
+        statTotalTitle: "Total Properties",
+        statAvgPriceTitle: "Average Price",
+        statAvgAreaTitle: "Average Area"
+      }
+    };
 
     function checkPassword() {
       const pass = document.getElementById("passInput").value;
@@ -187,7 +401,7 @@ const firebaseConfig = {
         sessionStorage.setItem("isLoggedIn", "true");
         showApp();
       } else {
-        alert("كلمة المرور غير صحيحة!");
+        alert(currentLang === 'ar' ? "كلمة المرور غير صحيحة!" : "Incorrect password!");
       }
     }
 
@@ -201,35 +415,153 @@ const firebaseConfig = {
       listenToLiveUpdates();
     }
 
-    // ⚡ الدالة المسؤولة عن المزامنة اللحظية بين كل الأجهزة
+    function toggleLanguage() {
+      currentLang = currentLang === "ar" ? "en" : "ar";
+      document.documentElement.lang = currentLang;
+      document.documentElement.dir = currentLang === "ar" ? "rtl" : "ltr";
+      
+      const t = translations[currentLang];
+      document.getElementById("pageTitle").innerText = t.pageTitle;
+      document.getElementById("loginText").innerText = t.loginText;
+      document.getElementById("passInput").placeholder = t.passPlaceholder;
+      document.getElementById("loginBtn").innerText = t.loginBtn;
+      document.getElementById("langBtnText").innerText = t.langBtnText;
+      document.getElementById("creditManager").innerHTML = `<i class="fas fa-user-tie"></i> ${t.creditManager}`;
+      document.getElementById("creditDev").innerHTML = `<i class="fas fa-code"></i> ${t.creditDev}`;
+      document.getElementById("btnAddText").innerText = t.btnAddText;
+      document.getElementById("tableTitleText").innerText = t.tableTitleText;
+      document.getElementById("globalInput").placeholder = t.globalSearch;
+      
+      document.getElementById("statTotalTitle").innerText = t.statTotalTitle;
+      document.getElementById("statAvgPriceTitle").innerText = t.statAvgPriceTitle;
+      document.getElementById("statAvgAreaTitle").innerText = t.statAvgAreaTitle;
+
+      document.getElementById("thLoc").innerText = t.thLoc;
+      document.getElementById("thPrice").innerText = t.thPrice;
+      document.getElementById("thArea").innerText = t.thArea;
+      document.getElementById("thRooms").innerText = t.thRooms;
+      document.getElementById("thFloor").innerText = t.thFloor;
+      document.getElementById("thDelivery").innerText = t.thDelivery;
+      document.getElementById("thInstallment").innerText = t.thInstallment;
+      document.getElementById("thGarden").innerText = t.thGarden;
+      document.getElementById("thFinish").innerText = t.thFinish;
+      document.getElementById("thPhone").innerText = t.thPhone;
+      document.getElementById("thDelete").innerText = t.thDelete;
+
+      document.getElementById("modalTitle").innerText = t.modalTitle;
+      document.getElementById("lblLoc").innerText = t.lblLoc;
+      document.getElementById("lblPrice").innerText = t.lblPrice;
+      document.getElementById("lblArea").innerText = t.lblArea;
+      document.getElementById("lblRooms").innerText = t.lblRooms;
+      document.getElementById("lblFloor").innerText = t.lblFloor;
+      document.getElementById("lblDelivery").innerText = t.lblDelivery;
+      document.getElementById("lblInstallment").innerText = t.lblInstallment;
+      document.getElementById("lblGarden").innerText = t.lblGarden;
+      document.getElementById("lblFinish").innerText = t.lblFinish;
+      document.getElementById("lblPhone").innerText = t.lblPhone;
+      document.getElementById("submitBtn").innerText = t.submitBtn;
+
+      document.getElementById("searchLocation").placeholder = t.searchPlace;
+      document.getElementById("searchPriceMax").placeholder = t.searchMax;
+      document.getElementById("searchAreaMax").placeholder = t.searchMax;
+      document.getElementById("searchRooms").placeholder = t.searchPlace;
+      document.getElementById("searchFloor").placeholder = t.searchPlace;
+      document.getElementById("searchDelivery").placeholder = t.searchPlace;
+      document.getElementById("searchInstallmentMin").placeholder = t.searchMin;
+      document.getElementById("searchGardenRoof").placeholder = t.searchPlace;
+      document.getElementById("searchFinishing").placeholder = t.searchPlace;
+      document.getElementById("searchPhone").placeholder = t.searchPlace;
+
+      listenToLiveUpdates();
+    }
+
+    function unlockPhones() {
+      const password = prompt(translations[currentLang].promptPhonePass);
+      if (password === "0110") {
+        isPhoneUnlocked = true;
+        sessionStorage.setItem("phoneUnlocked", "true");
+        listenToLiveUpdates();
+      } else if (password !== null) {
+        alert(currentLang === 'ar' ? "رمز المرور خاطئ!" : "Incorrect PIN!");
+      }
+    }
+
+    function maskPhone(phone) {
+      if (!phone) return '';
+      if (isPhoneUnlocked) return phone;
+      if (phone.length <= 4) return "****";
+      return "**** *** " + phone.slice(-3);
+    }
+
+    function updateStats(data) {
+      if (!data) {
+        document.getElementById("statTotalCount").innerText = "0";
+        document.getElementById("statAvgPrice").innerText = "0";
+        document.getElementById("statAvgArea").innerText = "0";
+        return;
+      }
+
+      const keys = Object.keys(data);
+      const total = keys.length;
+      let totalPrice = 0;
+      let totalArea = 0;
+
+      keys.forEach(k => {
+        totalPrice += parseFloat(data[k].price) || 0;
+        totalArea += parseFloat(data[k].area) || 0;
+      });
+
+      const avgPrice = total ? Math.round(totalPrice / total) : 0;
+      const avgArea = total ? Math.round(totalArea / total) : 0;
+
+      const t = translations[currentLang];
+      document.getElementById("statTotalCount").innerText = total;
+      document.getElementById("statAvgPrice").innerText = avgPrice.toLocaleString() + (currentLang === 'ar' ? " ج.م" : " EGP");
+      document.getElementById("statAvgArea").innerText = avgArea + " " + t.unitM2;
+    }
+
     function listenToLiveUpdates() {
       db.ref("properties").on("value", (snapshot) => {
         const tbody = document.getElementById("tableBody");
         tbody.innerHTML = "";
         const data = snapshot.val();
+        const t = translations[currentLang];
+
+        updateStats(data);
 
         if (data) {
           Object.keys(data).forEach((key) => {
             const item = data[key];
             const row = tbody.insertRow();
+            
+            const phoneDisplay = maskPhone(item.phone);
+            const lockIcon = isPhoneUnlocked 
+              ? `<i class="fas fa-lock-open" style="color:#d4af37"></i>` 
+              : `<button class="phone-lock-btn" onclick="unlockPhones()"><i class="fas fa-lock"></i></button>`;
+
             row.innerHTML = `
-              <td>${item.location || ''}</td>
+              <td><b style="color:#f3e5ab">${item.location || ''}</b></td>
               <td data-value="${item.price || 0}">${item.price ? parseFloat(item.price).toLocaleString() : 0}</td>
-              <td data-value="${item.area || 0}">${item.area || 0} م²</td>
+              <td data-value="${item.area || 0}">${item.area || 0} ${t.unitM2}</td>
               <td>${item.rooms || ''}</td>
               <td>${item.floor || ''}</td>
               <td>${item.delivery || ''}</td>
-              <td data-value="${item.installment || 0}">${item.installment || 0} سنوات</td>
+              <td data-value="${item.installment || 0}">${item.installment || 0} ${t.unitYears}</td>
               <td>${item.gardenRoof || ''}</td>
               <td>${item.finishing || ''}</td>
-              <td>${item.phone || ''}</td>
-              <td><button class="btn-action btn-delete" onclick="deleteProperty('${key}')">حذف <i class="fas fa-trash-alt"></i></button></td>
+              <td>
+                <div class="phone-cell">
+                  <span>${phoneDisplay}</span>
+                  ${lockIcon}
+                </div>
+              </td>
+              <td><button class="btn-action btn-delete" onclick="deleteProperty('${key}')">${t.btnDeleteText} <i class="fas fa-trash-alt"></i></button></td>
             `;
           });
         }
         filterTable();
       }, (error) => {
-        alert("خطأ الاتصال بالسحابة: " + error.message);
+        alert("Cloud Connection Error: " + error.message);
       });
     }
 
@@ -249,24 +581,28 @@ const firebaseConfig = {
         phone: document.getElementById("addPhone").value
       };
 
-      // إرسال العقار للسحابة لتصل لكل الأجهزة في نفس اللحظة
       db.ref("properties").push(newProperty)
         .then(() => {
           closeModal();
         })
         .catch((error) => {
-          alert("حدث خطأ أثناء الحفظ: " + error.message);
+          alert("Error saving: " + error.message);
         });
     }
 
     function deleteProperty(id) {
-      if (confirm("هل أنت متأكد من حذف هذا العقار؟")) {
+      const confirmMsg = currentLang === 'ar' ? "هل أنت متأكد من حذف هذا العقار؟" : "Are you sure you want to delete this property?";
+      if (confirm(confirmMsg)) {
         db.ref("properties/" + id).remove();
       }
     }
 
     function openModal() { document.getElementById("addModal").style.display = "flex"; }
     function closeModal() { document.getElementById("addModal").style.display = "none"; document.getElementById("addPropertyForm").reset(); }
+    
+    function closeModalOnOverlay(e) {
+      if (e.target.id === "addModal") closeModal();
+    }
 
     function filterTable() {
       const globalFilter = document.getElementById("globalInput").value.toLowerCase();
